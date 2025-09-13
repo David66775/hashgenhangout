@@ -112,13 +112,22 @@ const consoleDiv = document.getElementById("consoleDisplay");
 
   // Similarly override console.error, console.warn if needed
 })();
+  let x = "";
+  let xval = "";
 </script>
-
+  
 <script>
-// Test it
-console.log("Page loaded");
-console.log("This is a test message");
-console.log({foo: "bar"});
+  
+  function myRepeatingTask() {
+  for (let i = 0; i < 50; i++) {
+    xval = random(0, 1);
+    x += `${xval}`
+  }
+  console.log(x);
+}
+
+const delayInMilliseconds = 30;
+const intervalId = setInterval(myRepeatingTask, delayInMilliseconds);
 </script>
 <script id="sethashfunc">
 async function hashPassword(password) {
