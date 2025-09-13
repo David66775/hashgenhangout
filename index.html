@@ -2,74 +2,75 @@
 <html>
 <head>
 <meta charset="utf-8">
+<title>Matrix Screensaver Hash Generator</title>
 <style>
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-video {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -1;
-}
-#consoleDisplay {
-  line-height: 1;       /* makes lines tightly packed */
-  font-size: 14px;      /* adjust size to your liking */
-  margin: 0;
-  padding: 5px;         /* keep a little padding if you want */
-  white-space: pre;     /* preserves spacing exactly */
-}
-h1, h2, h3, p, #normal, #genbutton {
-  color: white;
-  animation: glow 1.5s infinite alternate;
-}
-
-@keyframes glow {
-  from {
-    text-shadow: 0 0 5px #f0f, 0 0 10px #f0f;
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    font-family: monospace;
   }
-  to {
-    text-shadow: 0 0 15px #f0f, 0 0 30px #f0f;
+
+  video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
   }
-}
 
-#normal {
-  background-color: transparent;
-  border: transparent;
-  color: white;
-}
+  canvas#matrix {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
 
-#normal::placeholder {
-  color: red;
-  animation: glow 1.5s infinite alternate;
-}
+  h1, h2, h3, p, #normal, #genbutton {
+    color: white;
+    animation: glow 1.5s infinite alternate;
+  }
 
-#genbutton {
-  background-color: transparent;
-  border: transparent;
-  color: white;
-}
+  @keyframes glow {
+    from { text-shadow: 0 0 5px #f0f, 0 0 10px #f0f; }
+    to { text-shadow: 0 0 15px #f0f, 0 0 30px #f0f; }
+  }
 
-#consoleDisplay {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow-y: auto;
-  background-color: rgba(0,0,0,0.8);
-  color: #0f0;
-  font-family: monospace;
-  padding: 5px;
-  box-sizing: border-box;
-  z-index: 1000;
-}
+  #normal {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 5px;
+    font-size: 16px;
+    margin: 10px;
+  }
+
+  #normal::placeholder {
+    color: #f0f;
+    animation: glow 1.5s infinite alternate;
+  }
+
+  #genbutton {
+    background-color: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  #hashedoutput {
+    color: white;
+    animation: glow 1.5s infinite alternate;
+    margin: 10px;
+    word-break: break-all;
+  }
 </style>
 </head>
 <body>
@@ -78,41 +79,49 @@ h1, h2, h3, p, #normal, #genbutton {
 
 <input type="text" id="normal" placeholder="Password To Hash">
 <button onclick="generatehash()" id="genbutton">Generate</button>
-
 <p id="hashedoutput">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</p>
 
-<div id="consoleDisplay"></div>
+<canvas id="matrix"></canvas>
 
 <script>
-// Override console.log to also print to #consoleDisplay
-const consoleDiv = document.getElementById("consoleDisplay");
-(function(){
-  const oldLog = console.log;
-  console.log = function(...args){
-    oldLog.apply(console, args);
-    const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
-    consoleDiv.innerHTML += msg + '<br>';
-    consoleDiv.scrollTop = consoleDiv.scrollHeight;
-  }
-})();
-</script>
+// --- Matrix Canvas Setup ---
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
 
-<script>
-// Generate 0s and 1s continuously
-function myRepeatingTask() {
-  let x = '';
-  for (let i = 0; i < 275; i++) {
-    x += Math.random() < 0.5 ? '0' : '1';
-  }
-  console.log(x); // will appear in #consoleDisplay because of override
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
-const delayInMilliseconds = 10; // adjust speed
-setInterval(myRepeatingTask, delayInMilliseconds);
-</script>
+const fontSize = 20;
+const columns = Math.floor(canvas.width / fontSize);
+const drops = Array(columns).fill(1);
 
-<script>
-// SHA-256 hashing function
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(0,0,0,0.05)'; // trailing effect
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#0f0';
+  ctx.font = fontSize + 'px monospace';
+
+  for (let i = 0; i < drops.length; i++) {
+    const text = Math.random() < 0.5 ? '0' : '1';
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+      drops[i] = 0;
+    }
+
+    drops[i]++;
+  }
+
+  requestAnimationFrame(drawMatrix);
+}
+drawMatrix();
+
+// --- SHA-256 Hash Function ---
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -121,71 +130,50 @@ async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Generate hash on button click
 let outputElement = document.getElementById("hashedoutput");
 async function generatehash() {
   const enteredpassword = document.getElementById("normal").value;
   const hashGen = await hashPassword(enteredpassword);
   outputElement.textContent = hashGen;
 }
-</script>
-<script>
+
+// --- Screensaver / Wake Lock ---
 let wakeLock = null;
 let cursorTimeout;
 
-function startScreensaver() {
-  // 1. Go fullscreen
+async function startScreensaver() {
+  // Fullscreen
   if (document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(err => {
       console.warn("Fullscreen request failed:", err);
     });
   }
 
-  // 2. Keep screen awake using Wake Lock API
-  async function requestWakeLock() {
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-      console.log('Wake lock active!');
-      wakeLock.addEventListener('release', () => {
-        console.log('Wake lock released');
-      });
-    } catch (err) {
-      console.error('Wake lock failed:', err);
-    }
-  }
-  requestWakeLock();
-
-  // 3. Hide cursor after 3 seconds of inactivity
-  function hideCursor() {
-    document.body.style.cursor = 'none';
+  // Wake Lock
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    console.log('Wake lock active!');
+    wakeLock.addEventListener('release', () => {
+      console.log('Wake lock released');
+    });
+  } catch (err) {
+    console.error('Wake lock failed:', err);
   }
 
+  // Cursor hide
+  function hideCursor() { document.body.style.cursor = 'none'; }
   document.body.style.cursor = 'default';
   document.addEventListener('mousemove', () => {
     document.body.style.cursor = 'default';
     clearTimeout(cursorTimeout);
     cursorTimeout = setTimeout(hideCursor, 3000);
   });
-
-  // 4. Continuous random task
-  function screensaverLoop() {
-    let x = "";
-    for (let i = 0; i < 50; i++) {
-      x += Math.random() < 0.5 ? 0 : 1;
-    }
-    console.log(x);
-    requestAnimationFrame(screensaverLoop);
-  }
-
-  requestAnimationFrame(screensaverLoop);
-
-  console.log("Screensaver started!");
 }
 
-// Example: automatically start screensaver after page loads
 window.addEventListener('load', () => {
   startScreensaver();
 });
 </script>
+
 </body>
 </html>
