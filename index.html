@@ -19,7 +19,13 @@ video {
   object-fit: cover;
   z-index: -1;
 }
-
+#consoleDisplay {
+  line-height: 1;       /* makes lines tightly packed */
+  font-size: 14px;      /* adjust size to your liking */
+  margin: 0;
+  padding: 5px;         /* keep a little padding if you want */
+  white-space: pre;     /* preserves spacing exactly */
+}
 h1, h2, h3, p, #normal, #genbutton {
   color: white;
   animation: glow 1.5s infinite alternate;
