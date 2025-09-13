@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Matrix Screensaver Hash Generator</title>
 <style>
-  body, html {
+  html, body {
     margin: 0;
     padding: 0;
     height: 100%;
@@ -17,8 +17,8 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     object-fit: cover;
     z-index: -2;
   }
@@ -27,8 +27,8 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     z-index: 0;
   }
 
@@ -49,6 +49,8 @@
     padding: 5px;
     font-size: 16px;
     margin: 10px;
+    z-index: 1;
+    position: relative;
   }
 
   #normal::placeholder {
@@ -63,6 +65,8 @@
     padding: 5px 10px;
     margin-left: 10px;
     cursor: pointer;
+    z-index: 1;
+    position: relative;
   }
 
   #hashedoutput {
@@ -70,6 +74,8 @@
     animation: glow 1.5s infinite alternate;
     margin: 10px;
     word-break: break-all;
+    z-index: 1;
+    position: relative;
   }
 </style>
 </head>
@@ -87,17 +93,17 @@
 // --- Matrix Canvas Setup ---
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
+let fontSize = 20;
+let columns, drops;
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  columns = Math.floor(canvas.width / fontSize);
+  drops = Array(columns).fill(1);
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
-
-const fontSize = 20;
-const columns = Math.floor(canvas.width / fontSize);
-const drops = Array(columns).fill(1);
 
 function drawMatrix() {
   ctx.fillStyle = 'rgba(0,0,0,0.05)'; // trailing effect
@@ -142,7 +148,7 @@ let wakeLock = null;
 let cursorTimeout;
 
 async function startScreensaver() {
-  // Fullscreen
+  // Force fullscreen
   if (document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(err => {
       console.warn("Fullscreen request failed:", err);
