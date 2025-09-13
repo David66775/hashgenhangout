@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+
+  height: 100%;
+  overflow: hidden;
+}
+
+video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+h1 {
+  color: white;
+  animation: glow 1.5s infinite alternate;
+}
+
+h2 {
+  color: white;
+  animation: glow 1.5s infinite alternate;
+}
+
+h3 {
+  color: white;
+  animation: glow 1.5s infinite alternate;
+}
+
+p {
+  color: white;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 5px #f0f, 0 0 10px #f0f;
+  }
+  to {
+    text-shadow: 0 0 15px #f0f, 0 0 30px #f0f;
+  }
+}
+
+#normal {
+background-color: transparent;
+border: transparent;
+color: white;
+animation: glow 1.5s infinite alternate;
+}
+
+#normal::placeholder {
+color: red;
+animation: glow 1.5s infinite alternate;
+}
+
+#genbutton {
+background-color: transparent;
+border: transparent;
+color: white;
+animation: glow 1.5s infinite alternate;
+}
+#consoleDisplay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: rgba(0,0,0,0.8);
+  color: #0f0;
+  font-family: monospace;
+  padding: 5px;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+</style>
+</head>
+<body>
+<video loop="" muted="" autoplay="" playsinline="" src="https://cdn.pixabay.com/video/2016/09/21/5364-183788428_medium.mp4">
+</video>
+
+<input type="text" id="normal" placeholder="Password To Hash">
+<button onclick="generatehash()" id="genbutton">Generate</button>
+
+<p id="hashedoutput">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</p>
+
+<div id="consoleDisplay"></div>
+
+<script>
+// Reference the div
+const consoleDiv = document.getElementById("consoleDisplay");
+
+// Override console.log to also print to the div
+(function(){
+  const oldLog = console.log;
+  console.log = function(...args){
+    // Original console
+    oldLog.apply(console, args);
+    // Append messages to div
+    const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+    consoleDiv.innerHTML += msg + '<br>';
+    consoleDiv.scrollTop = consoleDiv.scrollHeight; // Auto-scroll
+  }
+
+  // Similarly override console.error, console.warn if needed
+})();
+</script>
+
+<script>
+// Test it
+console.log("Page loaded");
+console.log("This is a test message");
+console.log({foo: "bar"});
+</script>
+<script id="sethashfunc">
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+</script>
+
+<script>
+let hashGen;
+let enteredpassword;
+let outputElement = document.getElementById("hashedoutput");
+async function generatehash() {
+enteredpassword = document.getElementById("normal").value;
+hashGen = await hashPassword(enteredpassword);
+outputElement.textContent = hashGen;
+}
+</script>
+
+</body></html>
