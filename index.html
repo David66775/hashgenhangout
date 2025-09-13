@@ -129,6 +129,63 @@ async function generatehash() {
   outputElement.textContent = hashGen;
 }
 </script>
+<script>
+let wakeLock = null;
+let cursorTimeout;
 
+function startScreensaver() {
+  // 1. Go fullscreen
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(err => {
+      console.warn("Fullscreen request failed:", err);
+    });
+  }
+
+  // 2. Keep screen awake using Wake Lock API
+  async function requestWakeLock() {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Wake lock active!');
+      wakeLock.addEventListener('release', () => {
+        console.log('Wake lock released');
+      });
+    } catch (err) {
+      console.error('Wake lock failed:', err);
+    }
+  }
+  requestWakeLock();
+
+  // 3. Hide cursor after 3 seconds of inactivity
+  function hideCursor() {
+    document.body.style.cursor = 'none';
+  }
+
+  document.body.style.cursor = 'default';
+  document.addEventListener('mousemove', () => {
+    document.body.style.cursor = 'default';
+    clearTimeout(cursorTimeout);
+    cursorTimeout = setTimeout(hideCursor, 3000);
+  });
+
+  // 4. Continuous random task
+  function screensaverLoop() {
+    let x = "";
+    for (let i = 0; i < 50; i++) {
+      x += Math.random() < 0.5 ? 0 : 1;
+    }
+    console.log(x);
+    requestAnimationFrame(screensaverLoop);
+  }
+
+  requestAnimationFrame(screensaverLoop);
+
+  console.log("Screensaver started!");
+}
+
+// Example: automatically start screensaver after page loads
+window.addEventListener('load', () => {
+  startScreensaver();
+});
+</script>
 </body>
 </html>
