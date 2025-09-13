@@ -120,10 +120,11 @@ const consoleDiv = document.getElementById("consoleDisplay");
   
   function myRepeatingTask() {
   for (let i = 0; i < 50; i++) {
-    xval = Math.random(0, 1);
+    xval = Math.random() < 0.5 ? '0' : '1';;
     x += `${xval}`
   }
   console.log(x);
+  x = "";
 }
 
 const delayInMilliseconds = 30;
