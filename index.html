@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html><head>
+<html>
+<head>
 <meta charset="utf-8">
 <style>
 body, html {
   margin: 0;
   padding: 0;
-
   height: 100%;
   overflow: hidden;
 }
@@ -20,22 +20,7 @@ video {
   z-index: -1;
 }
 
-h1 {
-  color: white;
-  animation: glow 1.5s infinite alternate;
-}
-
-h2 {
-  color: white;
-  animation: glow 1.5s infinite alternate;
-}
-
-h3 {
-  color: white;
-  animation: glow 1.5s infinite alternate;
-}
-
-p {
+h1, h2, h3, p, #normal, #genbutton {
   color: white;
   animation: glow 1.5s infinite alternate;
 }
@@ -50,23 +35,22 @@ p {
 }
 
 #normal {
-background-color: transparent;
-border: transparent;
-color: white;
-animation: glow 1.5s infinite alternate;
+  background-color: transparent;
+  border: transparent;
+  color: white;
 }
 
 #normal::placeholder {
-color: red;
-animation: glow 1.5s infinite alternate;
+  color: red;
+  animation: glow 1.5s infinite alternate;
 }
 
 #genbutton {
-background-color: transparent;
-border: transparent;
-color: white;
-animation: glow 1.5s infinite alternate;
+  background-color: transparent;
+  border: transparent;
+  color: white;
 }
+
 #consoleDisplay {
   position: fixed;
   bottom: 0;
@@ -84,8 +68,8 @@ animation: glow 1.5s infinite alternate;
 </style>
 </head>
 <body>
-<video loop="" muted="" autoplay="" playsinline="" src="https://cdn.pixabay.com/video/2016/09/21/5364-183788428_medium.mp4">
-</video>
+
+<video loop muted autoplay playsinline src="https://cdn.pixabay.com/video/2016/09/21/5364-183788428_medium.mp4"></video>
 
 <input type="text" id="normal" placeholder="Password To Hash">
 <button onclick="generatehash()" id="genbutton">Generate</button>
@@ -95,42 +79,35 @@ animation: glow 1.5s infinite alternate;
 <div id="consoleDisplay"></div>
 
 <script>
-// Reference the div
+// Override console.log to also print to #consoleDisplay
 const consoleDiv = document.getElementById("consoleDisplay");
-
-// Override console.log to also print to the div
 (function(){
   const oldLog = console.log;
   console.log = function(...args){
-    // Original console
     oldLog.apply(console, args);
-    // Append messages to div
     const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
     consoleDiv.innerHTML += msg + '<br>';
-    consoleDiv.scrollTop = consoleDiv.scrollHeight; // Auto-scroll
+    consoleDiv.scrollTop = consoleDiv.scrollHeight;
   }
-
-  // Similarly override console.error, console.warn if needed
 })();
-  let x = "";
-  let xval = "";
 </script>
-  
+
 <script>
-  
-  function myRepeatingTask() {
+// Generate 0s and 1s continuously
+function myRepeatingTask() {
+  let x = '';
   for (let i = 0; i < 50; i++) {
-    xval = Math.random() < 0.5 ? '0' : '1';;
-    x += `${xval}`
+    x += Math.random() < 0.5 ? '0' : '1';
   }
-  console.log(x);
-  x = "";
+  console.log(x); // will appear in #consoleDisplay because of override
 }
 
-const delayInMilliseconds = 30;
-const intervalId = setInterval(myRepeatingTask, delayInMilliseconds);
+const delayInMilliseconds = 100; // adjust speed
+setInterval(myRepeatingTask, delayInMilliseconds);
 </script>
-<script id="sethashfunc">
+
+<script>
+// SHA-256 hashing function
 async function hashPassword(password) {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
@@ -138,17 +115,15 @@ async function hashPassword(password) {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
-</script>
 
-<script>
-let hashGen;
-let enteredpassword;
+// Generate hash on button click
 let outputElement = document.getElementById("hashedoutput");
 async function generatehash() {
-enteredpassword = document.getElementById("normal").value;
-hashGen = await hashPassword(enteredpassword);
-outputElement.textContent = hashGen;
+  const enteredpassword = document.getElementById("normal").value;
+  const hashGen = await hashPassword(enteredpassword);
+  outputElement.textContent = hashGen;
 }
 </script>
 
-</body></html>
+</body>
+</html>
